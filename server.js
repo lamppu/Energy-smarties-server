@@ -9,7 +9,7 @@ dotenv.config();
 const knex = require('./config/db').knex;
 
 const bookshelf = require('bookshelf') (knex);
-
+const sche = require('./config/schema');
 
 app.listen(PORT, () => {
     console.log(`Server is listening on port: ${PORT}`);
