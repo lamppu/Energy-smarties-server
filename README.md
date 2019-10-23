@@ -8,4 +8,4 @@ To get started
 - run "npm install" to install dependencies
 - run "npm start" to start the server
 - add a .gitignore file
-- there will be a .env file added with the db connection stuff, I'll add the things needed to teams soon
+- add a .env file with the db connection stuff, you can find the contents you should add in the Developers channel in Teams
