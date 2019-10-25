@@ -1,3 +1,2 @@
-//const knex = require('./config/db').knex;
-//const bookshelf = require('bookshelf') (knex);
-
+// const knex = require('../config/db').knex;
+// const bookshelf = require('bookshelf') (knex);
