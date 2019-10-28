@@ -99,3 +99,6 @@ public
 
 # TernJS port file
 .tern-port
+
+# Data files and test files
+data/ggei2018.*
