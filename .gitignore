@@ -102,3 +102,7 @@ public
 
 # Data files and test files
 data/ggei2018.*
+data/ggmcf.csv
+data/playstore.csv
+data/test.js
+data/apps.csv

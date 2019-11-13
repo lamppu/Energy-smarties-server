@@ -19,6 +19,9 @@ exports.seed = async (knex) => {
       if (elem.CountryName === 'Vietnam') {
         return ({ CountryName: elem.CountryName, AltName: 'Viet Nam' });
       }
+      if (elem.CountryName === 'Slovak Republic') {
+        return ({ CountryName: elem.CountryName, AltName: 'Slovakia' });
+      }
       return ({ CountryName: elem.CountryName });
     };
     const countries = ggei2018.map(getCountries);
