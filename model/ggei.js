@@ -1,2 +1,10 @@
-// const knex = require('../config/db').knex;
-// const bookshelf = require('bookshelf') (knex);
+const bookshelf = require('../bookshelf');
+
+require('./country.js');
+
+module.exports = bookshelf.model('GGEI', {
+  tableName: 'GGEI',
+  country() {
+    return this.belongsTo('Country');
+  },
+});
