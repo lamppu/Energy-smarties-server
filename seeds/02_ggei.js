@@ -5,7 +5,7 @@ exports.seed = async (knex) => {
     const ggei2018 = await parser('./data/ggei2018.csv', ';');
     const getGGEI = (elem, i) => {
       const one = 1;
-      return { Year: 2018, Index: parseFloat((elem.ggeiIndex).replace(/,/g, '.')), CountryId: i + one };
+      return { Year: 2018, Index: parseFloat((elem.ggeiIndex).replace(/,/g, '.')), Country_id: i + one };
     };
     const ggeiInsert = ggei2018.map(getGGEI);
     await knex('GGEI').insert(ggeiInsert);

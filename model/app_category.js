@@ -4,11 +4,11 @@ require('./application.js');
 require('./category.js');
 
 module.exports = bookshelf.model('AppCategory', {
-  tableName: 'AppCategory',
-  apps() {
-    return this.hasMany('Application');
+  tableName: 'Application_Category',
+  app() {
+    return this.hasOne('Application');
   },
-  categories() {
-    return this.hasMany('Category');
+  category() {
+    return this.belongsTo('Category');
   },
 });

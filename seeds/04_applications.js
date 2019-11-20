@@ -21,51 +21,47 @@ exports.seed = async (knex) => {
       return true;
     };
     const getComp = (elem) => {
-      const country = knex.select('CountryId').from('Country')
+      const country = knex.select('id').from('Country')
         .where({ CountryName: elem.Country })
         .orWhere({ Abbrev: elem.Country })
         .orWhere({ AltName: elem.Country });
-      console.log('countryId');
-      console.log(country);
       if (country !== null) {
-        const city = knex.select('CityId').from('City')
+        const city = knex.select('id').from('City')
           .where({ CityName: elem.City })
-          .andWhere({ CountryId: country });
-        console.log('cityId');
-        console.log(country);
+          .andWhere({ Country_id: country });
         if (city !== null) {
           return {
             CompanyName: elem.Company,
-            CityId: city,
+            City_id: city,
           };
         }
       }
       return { CompanyName: elem.Company };
     };
     const getApp = (elem) => {
-      const company = knex.select('CompanyId').from('Company')
+      const company = knex.select('id').from('Company')
         .where({ CompanyName: elem.Company });
       return {
         AppName: elem.App,
-        CompanyId: company,
+        Company_id: company,
       };
     };
     const getEC = (elem) => {
-      const app = knex.select('AppId').from('Application')
+      const app = knex.select('id').from('Application')
         .where({ AppName: elem.App });
       return {
         ConsumptionRate: parseFloat((elem.ConsumptionRate).replace(/,/g, '.')),
-        AppId: app,
+        Application_id: app,
       };
     };
     const getAppCat = (elem) => {
-      const app = knex.select('AppId').from('Application')
+      const app = knex.select('id').from('Application')
         .where({ AppName: elem.App });
-      const category = knex.select('CategoryId').from('Category')
+      const category = knex.select('id').from('Category')
         .where({ CategoryName: elem.Category });
       return {
-        AppId: app,
-        CategoryId: category,
+        Application_id: app,
+        Category_id: category,
       };
     };
     const catInsert = appData.filter(filterCat).map(getCat);
@@ -77,7 +73,7 @@ exports.seed = async (knex) => {
     const eCInsert = appData.map(getEC);
     await knex('EnergyConsumption').insert(eCInsert);
     const appCatInsert = appData.map(getAppCat);
-    await knex('AppCategory').insert(appCatInsert);
+    await knex('Application_Category').insert(appCatInsert);
   } catch (e) {
     console.log(e);
   }

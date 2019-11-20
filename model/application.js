@@ -12,9 +12,8 @@ module.exports = bookshelf.model('Application', {
   /*
   ecs() {
     return this.hasMany('Energy consumption');
-  },
+  }, */
   categories() {
-    return this.hasMany('Category');
+    return this.belongsToMany('Category');
   },
-  */
 });

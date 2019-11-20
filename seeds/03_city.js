@@ -20,7 +20,7 @@ exports.seed = async (knex) => {
     const vantaa = 4.7;
     const kauni = 4.1;
     const getCityModel = (elem) => {
-      const id = knex.select('CountryId').from('Country')
+      const id = knex.select('id').from('Country')
         .where({ CountryName: elem.Country })
         .orWhere({ Abbrev: elem.Country })
         .orWhere({ AltName: elem.Country });
@@ -29,30 +29,31 @@ exports.seed = async (knex) => {
           CityName: elem.UrbanCluster,
           GGMCF: parseFloat(elem.FootprintPerCap_t_CO2),
           CoH_footprint: hel,
-          CountryId: id,
+          Country_id: id,
         };
       }
       return {
         CityName: elem.UrbanCluster,
         GGMCF: parseFloat(elem.FootprintPerCap_t_CO2),
-        CountryId: id,
+        Country_id: id,
       };
     };
     const cityInsert = ggmcf.filter(filterCities).map(getCityModel);
+    const finId = knex('Country').select('id').where({ CountryName: 'Finland' });
     cityInsert.push({
       CityName: 'Espoo',
       CoH_footprint: espoo,
-      CountryId: knex('Country').select('CountryId').where({ CountryName: 'Finland' }),
+      Country_id: finId,
     });
     cityInsert.push({
       CityName: 'Vantaa',
       CoH_footprint: vantaa,
-      CountryId: knex('Country').select('CountryId').where({ CountryName: 'Finland' }),
+      Country_id: finId,
     });
     cityInsert.push({
       CityName: 'Kauniainen',
       CoH_footprint: kauni,
-      CountryId: knex('Country').select('CountryId').where({ CountryName: 'Finland' }),
+      Country_id: finId,
     });
     console.log(cityInsert);
     await knex('City').insert(cityInsert);

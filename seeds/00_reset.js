@@ -1,8 +1,8 @@
 
 exports.seed = async (knex) => {
   // Deletes ALL existing entries
-  await knex('AppCategory').del();
-  await knex.raw('ALTER TABLE AppCategory AUTO_INCREMENT = 1');
+  await knex('Application_Category').del();
+  await knex.raw('ALTER TABLE Application_Category AUTO_INCREMENT = 1');
   await knex('Category').del();
   await knex.raw('ALTER TABLE Category AUTO_INCREMENT = 1');
   await knex('EnergyConsumption').del();
