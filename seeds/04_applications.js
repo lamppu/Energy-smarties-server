@@ -1,5 +1,9 @@
 const parser = require('../data/parser');
 
+const { map } = require('p-iteration');
+
+const { filter } = require('p-iteration');
+
 exports.seed = async (knex) => {
   try {
     const appData = await parser('./data/apps.csv', ';');
@@ -64,8 +68,46 @@ exports.seed = async (knex) => {
         Category_id: category,
       };
     };
+    const getFilteredCities = async (data) => {
+      const filtered = await filter(data, async (elem) => {
+        const country = await knex.select('id').from('Country')
+          .where({ CountryName: elem.Country })
+          .orWhere({ Abbrev: elem.Country })
+          .orWhere({ AltName: elem.Country });
+        // const country = await response1.toJson();
+        console.log(country);
+        const city = await knex.select('id').from('City')
+          .where({ CityName: elem.City })
+          .andWhere({ Country_id: country[0].id });
+        // const city = await response2.toJson();
+        console.log(city);
+        const zero = 0;
+        return city.length === zero;
+      });
+      return filtered;
+    };
+    const getMappedCities = (data) => map(data, async (elem) => {
+      const country = await knex.select('id').from('Country')
+        .where({ CountryName: elem.Country })
+        .orWhere({ Abbrev: elem.Country })
+        .orWhere({ AltName: elem.Country });
+      // const country = response.toJson();
+      console.log(country);
+      return ({ CityName: elem.City, Country_id: country[0].id });
+    });
+    const getCityInsert = async (data) => {
+      const filtered = await getFilteredCities(data);
+      const mapped = await getMappedCities(filtered);
+      return mapped;
+    };
     const catInsert = appData.filter(filterCat).map(getCat);
     await knex('Category').insert(catInsert);
+    const cityInsert = await getCityInsert(appData);
+    console.log('------------------');
+    console.log('cityInsert');
+    console.log(cityInsert);
+    console.log('------------------');
+    await knex('City').insert(cityInsert);
     const compInsert = appData.filter(filterComp).map(getComp);
     await knex('Company').insert(compInsert);
     const appInsert = appData.map(getApp);

@@ -9,10 +9,9 @@ module.exports = bookshelf.model('Application', {
   company() {
     return this.belongsTo('Company');
   },
-  /*
   ecs() {
-    return this.hasMany('Energy consumption');
-  }, */
+    return this.hasMany('EnergyConsumption');
+  },
   categories() {
     return this.belongsToMany('Category');
   },

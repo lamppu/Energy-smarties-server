@@ -8,7 +8,7 @@ module.exports = bookshelf.model('City', {
   country() {
     return this.belongsTo('Country');
   },
-  /* companies() {
+  companies() {
     return this.hasMany('Company');
-  }, */
+  },
 });

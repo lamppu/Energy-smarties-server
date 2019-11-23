@@ -55,7 +55,7 @@ exports.seed = async (knex) => {
       CoH_footprint: kauni,
       Country_id: finId,
     });
-    console.log(cityInsert);
+    // console.log(cityInsert);
     await knex('City').insert(cityInsert);
   } catch (e) {
     console.log(e);
