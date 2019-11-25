@@ -5,6 +5,8 @@ exports.seed = async (knex) => {
   await knex.raw('ALTER TABLE Application_Category AUTO_INCREMENT = 1');
   await knex('Category').del();
   await knex.raw('ALTER TABLE Category AUTO_INCREMENT = 1');
+  await knex('Scaling').del();
+  await knex.raw('ALTER TABLE Scaling AUTO_INCREMENT = 1');
   await knex('EnergyConsumption').del();
   await knex.raw('ALTER TABLE EnergyConsumption AUTO_INCREMENT = 1');
   await knex('Application').del();

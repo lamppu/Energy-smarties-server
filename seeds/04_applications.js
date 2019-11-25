@@ -1,11 +1,13 @@
-const parser = require('../data/parser');
-
 const { map } = require('p-iteration');
 
 const { filter } = require('p-iteration');
 
+const parser = require('../data/parser');
+
+
 exports.seed = async (knex) => {
   try {
+    const zero = 0;
     const appData = await parser('./data/apps.csv', ';');
     const categories = new Set();
     const filterCat = (elem) => {
@@ -15,7 +17,15 @@ exports.seed = async (knex) => {
       categories.add(elem.Category);
       return true;
     };
-    const getCat = (elem) => ({ CategoryName: elem.Category });
+    const getCat = (elem) => {
+      const scale = 'Scale';
+      const scaleName = elem.Category + scale;
+      const scaleId = knex.select('id').from('Scaling').where({ ScaleName: scaleName });
+      return {
+        CategoryName: elem.Category,
+        Scaling_id: scaleId,
+      };
+    };
     const companies = new Set();
     const filterComp = (elem) => {
       if (companies.has(elem.Company)) {
@@ -25,6 +35,12 @@ exports.seed = async (knex) => {
       return true;
     };
     const getComp = (elem) => {
+      let cfp;
+      if (parseFloat(elem.Company_footprint)) {
+        cfp = parseFloat(elem.Company_footprint);
+      } else {
+        cfp = null;
+      }
       const country = knex.select('id').from('Country')
         .where({ CountryName: elem.Country })
         .orWhere({ Abbrev: elem.Country })
@@ -36,11 +52,15 @@ exports.seed = async (knex) => {
         if (city !== null) {
           return {
             CompanyName: elem.Company,
+            Carbon_footprint: cfp,
             City_id: city,
           };
         }
       }
-      return { CompanyName: elem.Company };
+      return {
+        CompanyName: elem.Company,
+        Carbon_footprint: cfp,
+      };
     };
     const getApp = (elem) => {
       const company = knex.select('id').from('Company')
@@ -74,14 +94,9 @@ exports.seed = async (knex) => {
           .where({ CountryName: elem.Country })
           .orWhere({ Abbrev: elem.Country })
           .orWhere({ AltName: elem.Country });
-        // const country = await response1.toJson();
-        console.log(country);
         const city = await knex.select('id').from('City')
           .where({ CityName: elem.City })
           .andWhere({ Country_id: country[0].id });
-        // const city = await response2.toJson();
-        console.log(city);
-        const zero = 0;
         return city.length === zero;
       });
       return filtered;
@@ -91,8 +106,6 @@ exports.seed = async (knex) => {
         .where({ CountryName: elem.Country })
         .orWhere({ Abbrev: elem.Country })
         .orWhere({ AltName: elem.Country });
-      // const country = response.toJson();
-      console.log(country);
       return ({ CityName: elem.City, Country_id: country[0].id });
     });
     const getCityInsert = async (data) => {
@@ -100,13 +113,65 @@ exports.seed = async (knex) => {
       const mapped = await getMappedCities(filtered);
       return mapped;
     };
-    const catInsert = appData.filter(filterCat).map(getCat);
+    const filteredCats = appData.filter(filterCat);
+    const getScaling = (inputArray, scaleName) => {
+      const min = 0;
+      const max = 10;
+      const array = inputArray.filter((elem) => elem);
+      console.log(array);
+      if (!array.length) {
+        return ({
+          ScaleName: scaleName,
+          VariableA: 0,
+          VariableB: 0,
+          Min: min,
+          Max: max,
+        });
+      }
+      const arrayMin = Math.min(...array);
+      const arrayMax = Math.max(...array);
+      const x = arrayMin - (arrayMax - arrayMin) / array.length;
+      const y = arrayMax + (arrayMax - arrayMin) / array.length;
+      if (y - x === zero) {
+        return ({
+          ScaleName: scaleName,
+          VariableA: 0,
+          VariableB: 0,
+          Min: min,
+          Max: max,
+        });
+      }
+      const a = (min - max) / (y - x);
+      const b = max - a * x;
+      return ({
+        ScaleName: scaleName,
+        VariableA: a,
+        VariableB: b,
+        Min: min,
+        Max: max,
+      });
+    };
+    const scalingInsert = [];
+    categories.forEach((elem) => {
+      const cat = elem;
+      const scale = 'Scale';
+      const scaleName = elem + scale;
+      const ecs = [];
+      appData.forEach((app) => {
+        if (app.Category === cat) {
+          ecs.push(parseFloat((app.ConsumptionRate).replace(/,/g, '.')));
+        }
+      });
+      scalingInsert.push(getScaling(ecs, scaleName));
+    });
+    const getCompFP = (elem) => parseFloat(elem.Company_footprint);
+    const compFootprints = appData.map(getCompFP);
+    console.log(compFootprints);
+    scalingInsert.push(getScaling(compFootprints, 'CompanyScale'));
+    await knex('Scaling').insert(scalingInsert);
+    const catInsert = filteredCats.map(getCat);
     await knex('Category').insert(catInsert);
     const cityInsert = await getCityInsert(appData);
-    console.log('------------------');
-    console.log('cityInsert');
-    console.log(cityInsert);
-    console.log('------------------');
     await knex('City').insert(cityInsert);
     const compInsert = appData.filter(filterComp).map(getComp);
     await knex('Company').insert(compInsert);

@@ -27,6 +27,13 @@ exports.seed = async (knex) => {
     const countries = ggei2018.map(getCountries);
     // Inserts seed entries
     await knex('Country').insert(countries);
+    await knex('Scaling').insert([{
+      ScaleName: 'CountryScale',
+      VariableA: 10,
+      VariableB: 0,
+      Min: 0,
+      Max: 10,
+    }]);
   } catch (e) {
     console.log(e);
   }

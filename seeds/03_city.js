@@ -56,7 +56,27 @@ exports.seed = async (knex) => {
       Country_id: finId,
     });
     // console.log(cityInsert);
+    const getScalingInsert = (array) => {
+      const min = 0;
+      const max = 10;
+      const x = 0;
+      const arrayMin = Math.min(...array);
+      const arrayMax = Math.max(...array);
+      const y = arrayMax + (arrayMax - arrayMin) / array.length;
+      const a = (min - max) / (y - x);
+      const b = max - a * x;
+      return [{
+        ScaleName: 'CityScale',
+        VariableA: a,
+        VariableB: b,
+        Min: min,
+        Max: max,
+      }];
+    };
     await knex('City').insert(cityInsert);
+    const getGGMCFs = (elem) => parseFloat(elem.FootprintPerCap_t_CO2);
+    const ggmcfs = ggmcf.map(getGGMCFs);
+    await knex('Scaling').insert(getScalingInsert(ggmcfs));
   } catch (e) {
     console.log(e);
   }
