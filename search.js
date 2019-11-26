@@ -72,7 +72,7 @@ router.get('/search', async (req, res) => {
       collection = await Application.where({ AppName: req.query.keyword })
         .fetch({ require: false, withRelated: ['categories'] });
       if (!collection) {
-        response = 'Nothing found';
+        response = ['Nothing found'];
       } else {
         collection = await Category.where({ id: collection.toJSON().categories[0].id })
           .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
@@ -84,7 +84,7 @@ router.get('/search', async (req, res) => {
     res.send(response);
   } catch (e) {
     console.log(e);
-    res.send('Nothing found');
+    res.send(['Nothing found']);
   }
 });
 
