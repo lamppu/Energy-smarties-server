@@ -22,6 +22,7 @@ router.get('/search', async (req, res) => {
     const countryScale = await Scaling.where({ ScaleName: 'CountryScale' }).fetch();
     const cityScale = await Scaling.where({ ScaleName: 'CityScale' }).fetch();
     const compScale = await Scaling.where({ ScaleName: 'CompanyScale' }).fetch();
+    let catcollection = true;
     let collection;
     const getResponse = (elem) => {
       const appName = elem.AppName;
@@ -29,11 +30,21 @@ router.get('/search', async (req, res) => {
       const compcf = elem.company.Carbon_footprint;
       const citycf = elem.company.city.GGMCF;
       const ggei = elem.company.city.country.ggeis[0].Index;
-      const es = score(
-        collection.toJSON().scaling.VariableA,
-        collection.toJSON().scaling.VariableB,
-        rate,
-      );
+      let es;
+      if (catcollection) {
+        es = score(
+          collection.toJSON().scaling.VariableA,
+          collection.toJSON().scaling.VariableB,
+          rate,
+        );
+      } else {
+        console.log(elem);
+        es = score(
+          elem.categories[0].scaling.VariableA,
+          elem.categories[0].scaling.VariableB,
+          rate,
+        );
+      }
       let comps;
       if (compcf) {
         comps = score(
@@ -72,7 +83,19 @@ router.get('/search', async (req, res) => {
       collection = await Application.where({ AppName: req.query.keyword })
         .fetch({ require: false, withRelated: ['categories'] });
       if (!collection) {
-        response = ['Nothing found'];
+        collection = await Application.query((qb) => {
+          qb.whereRaw('`AppName` LIKE ?', [`%${req.query.keyword}%`]);
+        }).fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
+        if (!collection) {
+          response = ['Nothing found'];
+        } else if (collection.toJSON().length > one) {
+          catcollection = false;
+          response = collection.toJSON().map(getResponse);
+        } else {
+          collection = await Category.where({ id: collection.toJSON().categories[0].id })
+            .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
+          response = collection.toJSON().apps.map(getResponse);
+        }
       } else {
         collection = await Category.where({ id: collection.toJSON().categories[0].id })
           .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
