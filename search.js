@@ -27,13 +27,14 @@ router.get('/search', async (req, res) => {
     let collection;
     const getResponse = (elem) => {
       const appName = elem.AppName;
+      const cityName = elem.company.city.CityName;
+      const countryName = elem.company.city.country.CountryName;
       const rate = elem.ecs[0].ConsumptionRate;
       const compcf = elem.company.Carbon_footprint;
       const citycf = elem.company.city.GGMCF;
       const ggei = elem.company.city.country.ggeis[0].Index;
       let es;
       if (partAppName) {
-        console.log(elem);
         es = score(
           elem.categories[0].scaling.VariableA,
           elem.categories[0].scaling.VariableB,
@@ -76,6 +77,8 @@ router.get('/search', async (req, res) => {
       }
       return ({
         AppName: appName,
+        City: cityName,
+        Country: countryName,
         EnergyScore: es.toFixed(one),
         CompanyScore: comps.toFixed(one),
         CityScore: cits.toFixed(one),
@@ -116,7 +119,6 @@ router.get('/search', async (req, res) => {
     let response;
     const sortResponse = () => {
       if (req.query.sortby) {
-        console.log('yes sort');
         if (req.query.sortby === 'total') {
           response.sort(sortByTotalScore);
         } else if (req.query.sortby === 'energy') {
@@ -181,7 +183,6 @@ router.get('/search', async (req, res) => {
     }).fetchAll({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
     if (collection.length) {
       partCatName = true;
-      console.log(collection.toJSON());
       response = collection.toJSON()[0].apps.map(getResponse);
       sortResponse();
       res.send(response);
