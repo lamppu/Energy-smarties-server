@@ -142,53 +142,56 @@ router.get('/search', async (req, res) => {
       response = collection.toJSON().apps.map(getResponse);
       sortResponse();
       res.send(response);
-    }
-    // No exact category was found, continue by looking for exact match from apps
-    collection = await Application.where({ AppName: req.query.keyword })
-      .fetch({ require: false, withRelated: ['categories'] });
-    if (collection) {
-      // Exact match was found from apps
-      collection = await Category.where({ id: collection.toJSON().categories[0].id })
-        .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
-      response = collection.toJSON().apps.map(getResponse);
-      sortResponse();
-      let toBeUnShifted;
-      response = response.filter((elem) => {
-        if (elem.AppName.toLowerCase() === req.query.keyword) {
-          toBeUnShifted = elem;
-          return false;
-        }
-        return true;
-      });
-      response.unshift(toBeUnShifted);
-      res.send(response);
-    }
-    // No exact app was found, continue by looking for apps
-    // for which the app name contains the search keyword
-    collection = await Application.query((qb) => {
-      qb.whereRaw('`AppName` LIKE ?', [`%${req.query.keyword}%`]);
-    }).fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
-    if (collection.length) {
-      // Found app/apps
-      partAppName = true;
-      response = collection.toJSON().map(getResponse);
-      sortResponse();
-      res.send(response);
-    }
-    // No apps were found, continue by looking for categories
-    // for which the category name contains the search keyword.
-    // NOT HANDLED: What if the search finds multiple categories?
-    collection = await Category.query((qb) => {
-      qb.whereRaw('`CategoryName` LIKE ?', [`%${req.query.keyword}%`]);
-    }).fetchAll({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
-    if (collection.length) {
-      partCatName = true;
-      response = collection.toJSON()[0].apps.map(getResponse);
-      sortResponse();
-      res.send(response);
     } else {
-      response = ['Nothing found'];
-      res.send(response);
+      // No exact category was found, continue by looking for exact match from apps
+      collection = await Application.where({ AppName: req.query.keyword })
+        .fetch({ require: false, withRelated: ['categories'] });
+      if (collection) {
+        // Exact match was found from apps
+        collection = await Category.where({ id: collection.toJSON().categories[0].id })
+          .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
+        response = collection.toJSON().apps.map(getResponse);
+        sortResponse();
+        let toBeUnShifted;
+        response = response.filter((elem) => {
+          if (elem.AppName.toLowerCase() === req.query.keyword) {
+            toBeUnShifted = elem;
+            return false;
+          }
+          return true;
+        });
+        response.unshift(toBeUnShifted);
+        res.send(response);
+      } else {
+        // No exact app was found, continue by looking for apps
+        // for which the app name contains the search keyword
+        collection = await Application.query((qb) => {
+          qb.whereRaw('`AppName` LIKE ?', [`%${req.query.keyword}%`]);
+        }).fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
+        if (collection.length) {
+          // Found app/apps
+          partAppName = true;
+          response = collection.toJSON().map(getResponse);
+          sortResponse();
+          res.send(response);
+        } else {
+          // No apps were found, continue by looking for categories
+          // for which the category name contains the search keyword.
+          // NOT HANDLED: What if the search finds multiple categories?
+          collection = await Category.query((qb) => {
+            qb.whereRaw('`CategoryName` LIKE ?', [`%${req.query.keyword}%`]);
+          }).fetchAll({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
+          if (collection.length) {
+            partCatName = true;
+            response = collection.toJSON()[0].apps.map(getResponse);
+            sortResponse();
+            res.send(response);
+          } else {
+            response = ['Nothing found'];
+            res.send(response);
+          }
+        }
+      }
     }
   } catch (e) {
     console.log(e);
