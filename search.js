@@ -34,24 +34,28 @@ router.get('/search', async (req, res) => {
       const citycf = elem.company.city.GGMCF;
       const ggei = elem.company.city.country.ggeis[0].Index;
       let es;
+      let categoryName;
       if (partAppName) {
         es = score(
           elem.categories[0].scaling.VariableA,
           elem.categories[0].scaling.VariableB,
           rate,
         );
+        categoryName = elem.categories[0].CategoryName;
       } else if (partCatName) {
         es = score(
           collection.toJSON()[0].scaling.VariableA,
           collection.toJSON()[0].scaling.VariableB,
           rate,
         );
+        categoryName = collection.toJSON()[0].CategoryName;
       } else {
         es = score(
           collection.toJSON().scaling.VariableA,
           collection.toJSON().scaling.VariableB,
           rate,
         );
+        categoryName = collection.toJSON().CategoryName;
       }
       let comps;
       if (compcf) {
@@ -76,42 +80,45 @@ router.get('/search', async (req, res) => {
         cous = zero;
       }
       return ({
-        AppName: appName,
-        City: cityName,
-        Country: countryName,
-        EnergyScore: es.toFixed(one),
-        CompanyScore: comps.toFixed(one),
-        CityScore: cits.toFixed(one),
-        CountryScore: cous.toFixed(one),
-        TotalScore: totalScore(es, comps, cits, cous).toFixed(one),
+        name: appName,
+        category: categoryName,
+        city: cityName,
+        country: countryName,
+        totalScore: totalScore(es, comps, cits, cous).toFixed(one),
+        subScores: [
+          { label: 'Energy Score', value: es.toFixed(one) },
+          { label: 'Company Score', value: comps.toFixed(one) },
+          { label: 'City Score', value: cits.toFixed(one) },
+          { label: 'Country Score', value: cous.toFixed(one) },
+        ],
       });
     };
     const sortByTotalScore = (a, b) => {
-      if (parseFloat(a.TotalScore) < parseFloat(b.TotalScore)) {
+      if (parseFloat(a.totalScore) < parseFloat(b.totalScore)) {
         return one;
       }
       return -one;
     };
     const sortByEnergyScore = (a, b) => {
-      if (parseFloat(a.EnergyScore) < parseFloat(b.EnergyScore)) {
+      if (parseFloat(a.subScores[0].value) < parseFloat(b.subScores[0].value)) {
         return one;
       }
       return -one;
     };
     const sortByCompanyScore = (a, b) => {
-      if (parseFloat(a.CompanyScore) < parseFloat(b.CompanyScore)) {
+      if (parseFloat(a.subScores[1].value) < parseFloat(b.subScores[1].value)) {
         return one;
       }
       return -one;
     };
     const sortByCityScore = (a, b) => {
-      if (parseFloat(a.CityScore) < parseFloat(b.CityScore)) {
+      if (parseFloat(a.subScores[2].value) < parseFloat(b.subScores[2].value)) {
         return one;
       }
       return -one;
     };
     const sortByCountryScore = (a, b) => {
-      if (parseFloat(a.CountryScore) < parseFloat(b.CountryScore)) {
+      if (parseFloat(a.subScores[3].value) < parseFloat(b.subScores[3].value)) {
         return one;
       }
       return -one;
@@ -154,7 +161,7 @@ router.get('/search', async (req, res) => {
         sortResponse();
         let toBeUnShifted;
         response = response.filter((elem) => {
-          if (elem.AppName.toLowerCase() === req.query.keyword) {
+          if (elem.name.toLowerCase() === req.query.keyword) {
             toBeUnShifted = elem;
             return false;
           }
