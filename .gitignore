@@ -109,3 +109,6 @@ data/apps.csv
 
 # Azure deployment
 .deployment
+
+# VSCode folder
+.vscode/*
