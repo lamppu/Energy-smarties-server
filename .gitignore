@@ -106,3 +106,6 @@ data/ggmcf.csv
 data/playstore.csv
 data/test.js
 data/apps.csv
+
+# Azure deployment
+.deployment
