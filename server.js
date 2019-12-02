@@ -2,9 +2,13 @@ const express = require('express');
 
 const cors = require('cors');
 
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const router = require('./search');
 
-const PORT = 5000;
+const { PORT } = process.env;
 const app = express();
 app.use(cors());
 app.use('/', router);

@@ -201,6 +201,9 @@ router.get('/search', async (req, res) => {
       }
     }
   } catch (e) {
+    if (e.Error === 'read ECONNRESET') {
+      console.log('Hello');
+    }
     console.log(e);
     res.send(['Nothing found']);
   }
