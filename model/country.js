@@ -1,6 +1,14 @@
-/* const knex = require('../config/db').knex;
-const bookshelf = require('bookshelf') (knex);
+const bookshelf = require('../bookshelf');
 
-const Country = bookshelf.Model.extend({
-    tableName: 'country'
-}) */
+require('./city.js');
+require('./ggei');
+
+module.exports = bookshelf.model('Country', {
+  tableName: 'Country',
+  cities() {
+    return this.hasMany('City');
+  },
+  ggeis() {
+    return this.hasMany('GGEI');
+  },
+});
