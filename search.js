@@ -154,9 +154,10 @@ router.get('/search', async (req, res) => {
     } else {
       // No exact category was found, continue by looking for exact match from apps
       collection = await Application.where({ AppName: req.query.keyword })
-        .fetch({ require: false, withRelated: ['categories'] });
+        .fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
       if (collection) {
         // Exact match was found from apps
+        /*
         collection = await Category.where({ id: collection.toJSON().categories[0].id })
           .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
         response = collection.toJSON().apps.map(getResponse);
@@ -177,6 +178,9 @@ router.get('/search', async (req, res) => {
         response = await getFilteredApps(apps);
         console.log(toBeUnShifted);
         response.unshift(toBeUnShifted);
+        res.send(response); */
+        partAppName = true;
+        response = collection.toJSON().map(getResponse);
         res.send(response);
       } else {
         // No exact app was found, continue by looking for apps
