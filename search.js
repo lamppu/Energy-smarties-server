@@ -2,8 +2,6 @@ const express = require('express');
 
 const router = express.Router();
 
-const { filter } = require('p-iteration');
-
 const Category = require('./model/category');
 
 const Scaling = require('./model/scaling');
@@ -162,7 +160,10 @@ router.get('/search', async (req, res) => {
         // Exact match was found from apps
         /*
         collection = await Category.where({ id: collection.toJSON().categories[0].id })
-          .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
+          .fetch({
+            require: false,
+            withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs']
+          });
         response = collection.toJSON().apps.map(getResponse);
         sortResponse();
         let toBeUnShifted;
@@ -174,9 +175,9 @@ router.get('/search', async (req, res) => {
               return false;
             }
             return true;
-          })
+          });
           return filteredApps;
-        }
+        };
         const apps = response;
         response = await getFilteredApps(apps);
         console.log(toBeUnShifted);
