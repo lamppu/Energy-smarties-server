@@ -147,15 +147,18 @@ router.get('/search', async (req, res) => {
     collection = await Category.where({ CategoryName: req.query.keyword })
       .fetch({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
     if (collection) {
+      console.log('Exact match found from category');
       // Exact match found from category
       response = collection.toJSON().apps.map(getResponse);
       sortResponse();
       res.send(response);
     } else {
+      console.log('No exact category was found');
       // No exact category was found, continue by looking for exact match from apps
       collection = await Application.where({ AppName: req.query.keyword })
         .fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
-      if (collection) {
+      if (collection.length) {
+        console.log('Exact match was found from apps');
         // Exact match was found from apps
         /*
         collection = await Category.where({ id: collection.toJSON().categories[0].id })
@@ -183,18 +186,22 @@ router.get('/search', async (req, res) => {
         response = collection.toJSON().map(getResponse);
         res.send(response);
       } else {
+        console.log('No exact app was found');
         // No exact app was found, continue by looking for apps
         // for which the app name contains the search keyword
         collection = await Application.query((qb) => {
           qb.whereRaw('`AppName` LIKE ?', [`%${req.query.keyword}%`]);
         }).fetchAll({ require: false, withRelated: ['categories.scaling', 'company.city.country.ggeis', 'ecs'] });
+        console.log(collection.toJSON());
         if (collection.length) {
+          console.log('Found app(s)');
           // Found app/apps
           partAppName = true;
           response = collection.toJSON().map(getResponse);
           sortResponse();
           res.send(response);
         } else {
+          console.log('No apps were found');
           // No apps were found, continue by looking for categories
           // for which the category name contains the search keyword.
           // NOT HANDLED: What if the search finds multiple categories?
@@ -202,6 +209,8 @@ router.get('/search', async (req, res) => {
             qb.whereRaw('`CategoryName` LIKE ?', [`%${req.query.keyword}%`]);
           }).fetchAll({ require: false, withRelated: ['scaling', 'apps.company.city.country.ggeis', 'apps.ecs'] });
           if (collection.length) {
+            console.log('Found category/ies');
+            // Found category/ies
             partCatName = true;
             response = collection.toJSON()[0].apps.map(getResponse);
             sortResponse();
