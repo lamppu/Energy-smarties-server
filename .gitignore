@@ -112,3 +112,7 @@ data/apps.csv
 
 # VSCode folder
 .vscode/*
+
+# https things
+server.cert
+server.key

@@ -8,11 +8,13 @@ dotenv.config();
 
 const router = require('./search');
 
-const { PORT } = process.env;
+// const { PORT } = process.env;
+const PORT = 5000;
 const app = express();
 app.use(cors());
 app.use('/', router);
 
-app.listen(PORT, () => {
+
+app.listen(PORT, 'localhost', () => {
   console.log(`Server is listening on port: ${PORT}`);
 });
