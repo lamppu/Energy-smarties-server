@@ -2,6 +2,8 @@ const express = require('express');
 
 const router = express.Router();
 
+const { filter } = require('p-iteration');
+
 const Category = require('./model/category');
 
 const Scaling = require('./model/scaling');
@@ -160,13 +162,20 @@ router.get('/search', async (req, res) => {
         response = collection.toJSON().apps.map(getResponse);
         sortResponse();
         let toBeUnShifted;
-        response = response.filter((elem) => {
-          if (elem.name.toLowerCase() === req.query.keyword) {
-            toBeUnShifted = elem;
-            return false;
-          }
-          return true;
-        });
+        const getFilteredApps = async (apps) => {
+          const filteredApps = await filter(apps, async (elem) => {
+            console.log(elem);
+            if (elem.name.toLowerCase() === req.query.keyword) {
+              toBeUnShifted = elem;
+              return false;
+            }
+            return true;
+          })
+          return filteredApps;
+        }
+        const apps = response;
+        response = await getFilteredApps(apps);
+        console.log(toBeUnShifted);
         response.unshift(toBeUnShifted);
         res.send(response);
       } else {
