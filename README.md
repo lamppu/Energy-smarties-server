@@ -1,5 +1,21 @@
 # Energy-smarties-server
 
+This repository includes the files for the back-end of the GreenerApps mobile application for the Innovation Project course.
+
+App idea: The app is used to evaluate how "green" an app is and compare it with other apps within the same category.
+
+This repository contains:
+- Migrations for creating the database and making changes to it
+- Seed files for seeding the database with data from csv.-files
+- Model files for modeling the tables of the database into objects
+- Server files
+
+The server in a nutshell: The server has a search functionality to search for apps by app name or category. The server counts the different scores for the apps and returns them in the response.
+
+Used tools and technologies: Node.js, Express.js, MySQL, Knex.js, Bookshelf.js, Nginx, Azure Cloud, CircleCI, ESLint
+
+## For team members:
+
 Gitignore from
 https://github.com/github/gitignore/blob/master/Node.gitignore
 
@@ -10,7 +26,7 @@ To get started
 - run "npm start" to start the server
 
 
-## Conventions
+### Conventions
 
 This project uses ESLinter to check code formatting and style.
 
